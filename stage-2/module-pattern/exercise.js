@@ -64,28 +64,22 @@ var UrlParser = (function () {
  *
  * exampleBuilder.
  */
-var createUrlBuilder = function (host) {
+let createUrlBuilder = function (host) {
   let url = host;
 
-  var builder = function (obj) {
+  let builder = function (obj) {
     let pathValue = obj.hasOwnProperty("path") ? obj.path : "";
     let queryValue = obj.hasOwnProperty("path") ? obj.query : {};
-    return `${builder.path(pathValue)}${queryHost(queryValue)}`;
+    return `${builder.path(pathValue)}${queryString(queryValue)}`;
   };
 
-  function queryHost(query) {
-    let arr = [];
-    for (const [key, value] of Object.entries(query)) {
-      arr.push(`${key}=${value}`);
-    }
-    let querys = arr.join("&");
-    return `?${querys}`;
-  }
+  let queryString = (query) =>
+    `?${Object.entries(query)
+      .map((keyAndValue) => keyAndValue.join("="))
+      .join("&")}`;
 
   builder.path = (path) => `${url}/${path}`;
-  builder.query = (query) => {
-    return `${url}${queryHost(query)}`;
-  };
+  builder.query = (query) => `${url}${queryString(query)}`;
   return builder;
 };
 
