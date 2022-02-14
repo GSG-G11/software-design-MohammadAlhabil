@@ -17,17 +17,12 @@ function addEvent(selector, event, callback) {
   document.querySelector(selector).addEventListener(event, callback);
 }
 
-function createRequest(url, callback) {
-  e.preventDefault();
-  var form = e.target;
-  var tag = form.querySelector("input[name=tags]").value;
-  var url = url;
-
+function createRequest(url, callback, tags) {
   var xhr = new XMLHttpRequest();
   xhr.addEventListener("load", () => {
     if (xhr.status === 200) {
       var response = JSON.parse(xhr.responseText);
-      callback();
+      callback(tags, response);
     } else {
       console.log("Status Code: " + xhr.status);
     }
@@ -37,14 +32,7 @@ function createRequest(url, callback) {
   xhr.send();
 }
 
-addEvent("#form-unanswered", "submit", () => {
-  var url =
-    "https://api.stackexchange.com/2.2/questions/unanswered?order=desc&sort=activity&site=stackoverflow&tagged=" +
-    tags;
-  createRequest(url, changeUnanswered);
-});
-
-function changeUnanswered() {
+function editResultsSummary(tags, response) {
   document.querySelector("#results-summary").innerHTML =
     "" +
     "<p>" +
@@ -54,7 +42,20 @@ function changeUnanswered() {
     response.items.length +
     " results" +
     "</p>";
+}
 
+addEvent("#form-unanswered", "submit", (e) => {
+  e.preventDefault();
+  var form = e.target;
+  var tags = form.querySelector("input[name=tags]").value;
+  var url =
+    "https://api.stackexchange.com/2.2/questions/unanswered?order=desc&sort=activity&site=stackoverflow&tagged=" +
+    tags;
+  createRequest(url, changeUnanswered, tags);
+});
+
+function changeUnanswered(tags, response) {
+  editResultsSummary(tags, response);
   document.querySelector("#results-body").innerHTML = response.items
     .map(function (item) {
       return (
@@ -80,24 +81,19 @@ function changeUnanswered() {
 
 // --------------------addEvent--------------------------- //
 
-addEvent("#form-answerers", "submit", () => {
+addEvent("#form-answerers", "submit", (e) => {
+  e.preventDefault();
+  var form = e.target;
+  var tags = form.querySelector("input[name=tags]").value;
   var url =
     "http://api.stackexchange.com/2.2/tags/" +
-    tag +
+    tags +
     "/top-answerers/all_time?site=stackoverflow";
-  createRequest(url, changeAnswerers);
+  createRequest(url, changeAnswerers, tags);
 });
 
-function changeAnswerers() {
-  document.querySelector("#results-summary").innerHTML =
-    "" +
-    "<p>" +
-    "Query of " +
-    tags +
-    " returned " +
-    response.items.length +
-    " results" +
-    "</p>";
+function changeAnswerers(tags, response) {
+  editResultsSummary(tags, response);
 
   document.querySelector("#results-body").innerHTML = response.items
     .map(function (item) {

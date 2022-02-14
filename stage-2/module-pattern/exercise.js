@@ -5,7 +5,7 @@
  *   npm run s2.modules
  * This will run a series of tests which should all pass.
  */
-'use strict';
+"use strict";
 
 /*
  * Create a single module (using an IIFE) which contains functionality to parse
@@ -17,24 +17,38 @@
  * |          |     |                |   |      |  |             |
  * | protocol |     |    domain      |   | path |  | querystring |
  */
+
 var UrlParser = (function () {
   // fill in ...
 
   return {
     // a function that takes a URL and returns its protocol
-    protocol: null,
+    protocol: function (url) {
+      return url.split("://")[0];
+    },
 
     // a function that takes a URL and returns its domain
-    domain: null,
+    domain: function (url) {
+      return url.split("://")[1].split("/")[0];
+    },
 
     // a function that takes a URL and returns its path
-    path: null,
+    path: function (url) {
+      let arr = url.split("://")[1].split("/");
+      arr.shift(arr[0]);
+      let last = arr[arr.length - 1].split("?")[0];
+      arr.pop(arr[0]);
+      arr.push(last);
+      let path = arr.join("/");
+      return path;
+    },
 
     // a function that takes a URL and returns its query string
-    querystring: null,
+    querystring: function (url) {
+      return url.split("?")[1];
+    },
   };
-});
-
+})();
 
 /*
  * Create a module that can support multiple instances (like in our example).
@@ -51,13 +65,26 @@ var UrlParser = (function () {
  * exampleBuilder.
  */
 var createUrlBuilder = function (host) {
-  // fill in ...
-
-  var builder = function () {}
-
+  let hostt = host;
+  let url;
+  var builder = function (obj) {
+    return {
+      path: function (path) {
+        return (url = hostt.concat(`/${path}`));
+      },
+      query: function (query) {
+        let arr = [];
+        for (const [key, value] of Object.entries(query)) {
+          arr.push(key.concat(`=${value}`));
+        }
+        let querys = arr.join("&");
+        url = url.concat(`?${querys}`);
+        return url;
+      },
+    };
+  };
   return builder;
 };
-
 
 module.exports = {
   UrlParser,
