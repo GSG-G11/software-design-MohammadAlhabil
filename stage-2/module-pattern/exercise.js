@@ -65,23 +65,26 @@ var UrlParser = (function () {
  * exampleBuilder.
  */
 var createUrlBuilder = function (host) {
-  let hostt = host;
-  let url;
+  let url = host;
+
   var builder = function (obj) {
-    return {
-      path: function (path) {
-        return (url = hostt.concat(`/${path}`));
-      },
-      query: function (query) {
-        let arr = [];
-        for (const [key, value] of Object.entries(query)) {
-          arr.push(key.concat(`=${value}`));
-        }
-        let querys = arr.join("&");
-        url = url.concat(`?${querys}`);
-        return url;
-      },
-    };
+    let pathValue = obj.hasOwnProperty("path") ? obj.path : "";
+    let queryValue = obj.hasOwnProperty("path") ? obj.query : {};
+    return `${builder.path(pathValue)}${queryHost(queryValue)}`;
+  };
+
+  function queryHost(query) {
+    let arr = [];
+    for (const [key, value] of Object.entries(query)) {
+      arr.push(`${key}=${value}`);
+    }
+    let querys = arr.join("&");
+    return `?${querys}`;
+  }
+
+  builder.path = (path) => `${url}/${path}`;
+  builder.query = (query) => {
+    return `${url}${queryHost(query)}`;
   };
   return builder;
 };
